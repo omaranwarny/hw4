@@ -1,0 +1,31 @@
+# Never commit secrets, data, or installs
+
+# Secrets (keep only the placeholder file)
+.env
+.env.*
+!.env.example
+
+# Local-only data pack: database + product images
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / Vite
+node_modules/
+frontend/dist/
+frontend/node_modules/.tmp/
+
+# Audit-writer leftovers (the real audit_trail.json IS committed)
+output/*.tmp
+output/audit_trail.broken-*.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campus Customs: App Check</title>
+<style>
+  :root { --yale:#00356b; --yale-light:#286dc0; --sky:#e8f0fa; --ink:#1b1f24; --muted:#5b6573; --line:#dde3ea; --ok:#2e8b57; --bad:#c0392b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:#f6f8fb; line-height:1.55; }
+  header { background:var(--yale); color:#fff; padding:36px 24px; }
+  header .wrap, main { max-width:1040px; margin:0 auto; }
+  h1, h2 { font-family: Georgia,"Times New Roman",serif; }
+  h1 { margin:0 0 6px; font-size:2.2rem; }
+  header p { margin:0; color:#cddcf0; }
+  main { padding:28px 24px 60px; }
+  .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px; }
+  .summary a { display:block; background:#fff; border:1px solid var(--line); border-left:5px solid var(--yale); border-radius:10px; padding:14px 16px; text-decoration:none; color:inherit; }
+  .summary b { color:var(--yale); display:block; }
+  .check { background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px; margin-bottom:28px; }
+  .check h2 { color:var(--yale); margin:0 0 4px; font-size:1.6rem; }
+  .tag { display:inline-block; font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--yale-light); margin-bottom:6px; }
+  .proves { font-size:1.05rem; margin:10px 0 16px; }
+  figure { margin:0; }
+  figure img { width:100%; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px -14px rgba(0,34,71,.45); display:block; }
+  figcaption { font-size:.9rem; color:var(--muted); margin-top:8px; }
+  .missing { border:2px dashed #c8d2de; border-radius:10px; padding:36px 20px; text-align:center; color:var(--muted); background:#fafbfc; }
+  .missing code { background:var(--sky); color:var(--yale); padding:2px 6px; border-radius:4px; }
+  .truth { margin-top:16px; background:var(--sky); border-radius:10px; padding:14px 16px; font-size:.92rem; }
+  .truth h3 { margin:0 0 8px; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--yale); }
+  table { border-collapse:collapse; width:100%; max-width:520px; background:#fff; border-radius:6px; overflow:hidden; }
+  th, td { padding:6px 10px; border-bottom:1px solid var(--line); text-align:left; font-size:.9rem; }
+  th { background:#f1f5fa; color:var(--muted); font-weight:600; }
+  .out { color:var(--bad); font-weight:700; }
+  .in { color:var(--ok); font-weight:600; }
+  details { margin-top:12px; font-size:.9rem; color:var(--muted); }
+  summary { cursor:pointer; color:var(--yale-light); font-weight:600; }
+  .two { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; align-items:start; }
+  .optional:has(img[data-missing]) { display:none; }
+  footer { text-align:center; color:var(--muted); font-size:.85rem; padding:20px; }
+  @media (max-width:800px){ .summary,.two{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Campus Customs: App Check</h1>
+    <p>Live test of the React + FastAPI + PydanticAI shop running locally (front end at <code>localhost:5173</code>, API at <code>127.0.0.1:8000</code>). Each check has a screenshot and what it proves.</p>
+  </div>
+</header>
+
+<main>
+  <nav class="summary" aria-label="Checks">
+    <a href="#inventory"><b>1 · Inventory check in chat</b>Honest stock and price from the database</a>
+    <a href="#search"><b>2 · Dynamic search cards</b>"What hoodies do you have?" fills the page</a>
+    <a href="#usability"><b>3 · Usability feature</b>Size, budget and sort filters + size row on cards</a>
+  </nav>
+
+  <!-- ===================== CHECK 1 ===================== -->
+  <section class="check" id="inventory">
+    <span class="tag">Check 1</span>
+    <h2>Chat checks the inventory of an item</h2>
+    <p class="proves"><strong>What this proves:</strong> on the Baseball Left Chest Crewneck page, the assistant answers "do you have this in XS and XL?" with the real database values. It says the item is <span class="out">sold out in XS and XL</span>, gives the exact price of <strong>$58.00</strong>, and lists the sizes still in stock. It knew which item "this" meant from the page context.</p>
+    <div class="two">
+      <figure>
+        <img src="app_check_images/inventory.png" alt="Chat answering a stock question on the Baseball Left Chest Crewneck page" onerror="missing(this)">
+        <figcaption>The assistant's reply on the product page. The stock table on the left of the page shows the same numbers.</figcaption>
+      </figure>
+      <div class="truth">
+        <h3>Database says (campus_customs.db)</h3>
+        <p><strong>Baseball Left Chest Crewneck</strong>: price <strong>$58.00</strong></p>
+        <table>
+          <tr><th>Size</th><th>Quantity</th><th>Status</th></tr>
+          <tr><td>XS</td><td>0</td><td class="out">sold out</td></tr>
+          <tr><td>S</td><td>15</td><td class="in">in stock</td></tr>
+          <tr><td>M</td><td>5</td><td class="in">low (5 left)</td></tr>
+          <tr><td>L</td><td>25</td><td class="in">in stock</td></tr>
+          <tr><td>XL</td><td>0</td><td class="out">sold out</td></tr>
+          <tr><td>XXL</td><td>25</td><td class="in">in stock</td></tr>
+        </table>
+        <p style="margin:8px 0 0">The chat's numbers must match this table. The backend fact-checker rejects any price or count no tool returned.</p>
+      </div>
+    </div>
+    <details><summary>How it was captured</summary>
+      Open <code>/products/baseball-left-chest-crewneck</code>, open the chat (💬), and ask: <em>"Do you have this in XS or XL? How much is it?"</em> Take a screenshot showing the reply and the stock table.
+    </details>
+  </section>
+
+  <!-- ===================== CHECK 2 ===================== -->
+  <section class="check" id="search">
+    <span class="tag">Check 2</span>
+    <h2>Dynamic search-result cards after a category question</h2>
+    <p class="proves"><strong>What this proves:</strong> asking <em>"What hoodies do you have?"</em> makes the agent search the catalogue and return structured product matches. The website then renders them as an <strong>"Assistant picks: Hoodies"</strong> section of product cards (photo, name, price, short description, size row) on the page itself, with a "See all" link to the full list.</p>
+    <figure>
+      <img src="app_check_images/hoodies.png" alt="Assistant picks section showing hoodie product cards after asking the chat about hoodies" onerror="missing(this)">
+      <figcaption>The cards appear at the top of the page and come from the database: the catalogue has <strong>27 hoodies, priced $45.00–$88.00</strong>. The chat keeps a short reply and notes "items shown on the page".</figcaption>
+    </figure>
+    <figure class="optional" style="margin-top:16px">
+      <img src="app_check_images/hoodies_detail.png" alt="Product detail page opened by clicking a chat result card" onerror="this.dataset.missing=1">
+      <figcaption>Clicking one of those chat cards opens the same single-item page (large image, full description, price, sizes and stock).</figcaption>
+    </figure>
+    <details><summary>How it was captured</summary>
+      On the Home page, open the chat and ask <em>"What hoodies do you have?"</em> Screenshot the page with the "Assistant picks" cards and the chat. Optionally, click a card and screenshot the detail page as <code>hoodies_detail.png</code>.
+    </details>
+  </section>
+
+  <!-- ===================== CHECK 3 ===================== -->
+  <section class="check" id="usability">
+    <span class="tag">Check 3 · Usability feature from Problem 9</span>
+    <h2>Smarter Products page: in stock in my size, budget, sort</h2>
+    <p class="proves"><strong>What this proves:</strong> the Products page filters to items that are <strong>in stock in XL</strong> and <strong>under $60</strong>, sorted by <strong>price low to high</strong>. Every card shows its size row, with sold-out sizes crossed out and XL highlighted, so shoppers only see what they can actually buy.</p>
+    <figure>
+      <img src="app_check_images/usability.png" alt="Products page with size XL, under $60 and price sort applied" onerror="missing(this)">
+      <figcaption>URL: <code>/products?size=XL&amp;max=60&amp;sort=price-asc</code>. The database has <strong>41 products</strong> in stock in XL under $60, which should match the count shown above the grid.</figcaption>
+    </figure>
+    <details><summary>How it was captured</summary>
+      Go to Products, click size <strong>XL</strong>, choose <strong>Under $60</strong> and <strong>Price: low to high</strong>. Screenshot the toolbar, the result count, and the first row of cards.
+    </details>
+  </section>
+</main>
+
+<footer>Campus Customs class project (HW4). Inspired by Yale Bulldog Blue by Campus Customs. Not affiliated with the shop.</footer>
+
+<script>
+  // Shows a clear placeholder if a screenshot file hasn't been added yet.
+  function missing(img) {
+    const name = img.getAttribute('src');
+    const box = document.createElement('div');
+    box.className = 'missing';
+    box.innerHTML = 'Screenshot not found: <code>' + name + '</code><br>Save it into <code>output/app_check_images/</code> with this exact name.';
+    img.replaceWith(box);
+  }
+</script>
+</body>
+</html>
