@@ -17,10 +17,18 @@ export default function NavBar() {
 
   return (
     <header className="site-header">
-      <div className="announce">Officially licensed Yale apparel · 57 Broadway, New Haven</div>
+      <div className="ticker" aria-label="Shop announcements">
+        <div className="ticker-track">
+          {[0, 1].map((k) => (
+            <span key={k} aria-hidden={k === 1}>
+              ★ Officially licensed Yale apparel &nbsp;·&nbsp; ★ 57 Broadway, New Haven &nbsp;·&nbsp; ★ Ask our assistant about live stock &nbsp;·&nbsp; ★ Boola Boola! &nbsp;·&nbsp; ★ XS–XXL in every style &nbsp;·&nbsp;
+            </span>
+          ))}
+        </div>
+      </div>
       <nav className="nav" aria-label="Main">
         <Link to="/" className="brand" onClick={close}>
-          <span className="brand-mark" aria-hidden="true">Y</span>
+          <span className="brand-mark" aria-hidden="true"><span>Y</span></span>
           <span className="brand-text">
             <strong>Campus Customs</strong>
             <small>Yale Bulldog Blue</small>

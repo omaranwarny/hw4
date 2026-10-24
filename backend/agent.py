@@ -59,6 +59,7 @@ class ChatDeps:
     known_prices: set[float] = field(default_factory=set)   # every price a tool returned (fact-check)
     known_counts: set[int] = field(default_factory=set)     # every stock count a tool returned (fact-check)
     shopper_numbers: set[float] = field(default_factory=set)  # numbers the shopper typed (e.g. "under $60")
+    calls: dict[str, int] = field(default_factory=dict)       # tool+args -> times called (loop guard)
 
 
 def note_facts(deps: "ChatDeps", obj) -> None:
@@ -76,6 +77,19 @@ def note_facts(deps: "ChatDeps", obj) -> None:
     elif isinstance(obj, list):
         for x in obj:
             note_facts(deps, x)
+
+
+REPEAT_NOTE = {
+    "note": "You already called this tool with the same arguments in this message. Use that earlier result "
+            "and give your final answer now. Don't call it again."
+}
+
+
+def repeated(deps: "ChatDeps", tool: str, *args) -> bool:
+    """Loop guard: True if this exact tool call already ran during this message."""
+    key = f"{tool}:{args!r}"
+    deps.calls[key] = deps.calls.get(key, 0) + 1
+    return deps.calls[key] > 1
 
 
 def model_name() -> str:
@@ -109,6 +123,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
     @agent.tool
     def get_customer_info(ctx: RunContext[ChatDeps]) -> dict:
         """Who the logged-in shopper is (name, email, member since, saved chat count). Guests get logged_in=false."""
+        if repeated(ctx.deps, "get_customer_info"):
+            return REPEAT_NOTE
         c = ctx.deps.customer
         if c is None:
             return {"logged_in": False}
@@ -118,6 +134,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
     def get_current_page(ctx: RunContext[ChatDeps]) -> dict:
         """What page the shopper is on right now, and the product they're viewing (if any), with live details."""
         d = ctx.deps
+        if repeated(d, "get_current_page"):
+            return REPEAT_NOTE
         out: dict = {"page": d.page.model_dump(exclude_none=True)}
         if d.current_product:
             out["viewing_product"] = d.current_product.model_dump()
@@ -138,6 +156,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
             size: only items currently in stock in this size (XS, S, M, L, XL, XXL; "large" etc. also work).
             limit: how many results to return (1-12). Use ~8-12 for "what X do you have?" questions.
         """
+        if repeated(ctx.deps, "search_products", query, category, max_price, color, size, limit):
+            return REPEAT_NOTE  # type: ignore[return-value]
         out = tools.search_products(query, category, max_price, color, size, limit)
         ctx.deps.seen_ids.update(r.product_id for r in out.results)
         note_facts(ctx.deps, out)
@@ -150,6 +170,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
     @agent.tool
     def get_product_details(ctx: RunContext[ChatDeps], product_id: str) -> ProductInfo | ToolError:
         """Full description, price, colors and stock for EVERY size of one product."""
+        if repeated(ctx.deps, "get_product_details", product_id):
+            return REPEAT_NOTE  # type: ignore[return-value]
         out = tools.get_product_details(product_id)
         if isinstance(out, ProductInfo):
             ctx.deps.seen_ids.add(product_id)
@@ -159,6 +181,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
     @agent.tool
     def get_price(ctx: RunContext[ChatDeps], product_id: str) -> PriceInfo | ToolError:
         """The current price (USD) of one product. Call this for every price question."""
+        if repeated(ctx.deps, "get_price", product_id):
+            return REPEAT_NOTE  # type: ignore[return-value]
         out = tools.get_price(product_id)
         if isinstance(out, PriceInfo):
             ctx.deps.seen_ids.add(product_id)
@@ -169,6 +193,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
     def check_stock(ctx: RunContext[ChatDeps], product_id: str, size: str | None = None) -> StockInfo | ToolError:
         """Live stock for one product. Pass the size the shopper asked about (e.g. "M", "large", "XL"),
         or leave size empty to get every size. The result's `summary` is a ready factual sentence."""
+        if repeated(ctx.deps, "check_stock", product_id, size):
+            return REPEAT_NOTE  # type: ignore[return-value]
         out = tools.check_stock(product_id, size)
         if isinstance(out, StockInfo):
             ctx.deps.seen_ids.add(product_id)
@@ -182,6 +208,8 @@ def build_agent() -> Agent[ChatDeps, ShopReply]:
         """In-stock alternatives to one product (same category, shared colors/tags, close in price).
         Use when an item is sold out in the shopper's size, doesn't come in their color, or they ask for
         "something like this". Every result is in stock (in `size`, if given) and has a short `why`."""
+        if repeated(ctx.deps, "find_similar_products", product_id, size, color, max_price, limit):
+            return REPEAT_NOTE  # type: ignore[return-value]
         out = tools.find_similar_products(product_id, size, color, max_price, limit)
         if isinstance(out, SimilarResult):
             ctx.deps.seen_ids.update(r.product_id for r in out.results)

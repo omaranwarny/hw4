@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../auth.tsx'
 import { useChatResults } from '../chatResults.tsx'
 import Markdown from './Markdown.tsx'
+import Bulldog from './Bulldog.tsx'
 import ProductCard from './ProductCard.tsx'
 
 type Msg = { role: 'user' | 'assistant'; content: string; products?: ProductSummary[]; onPage?: number; saved?: boolean }
@@ -132,7 +133,8 @@ export default function ChatWidget() {
       {open && (
         <section className="chat-panel" aria-label="Shop assistant chat">
           <header className="chat-head">
-            <div>
+            <Bulldog size={40} />
+            <div className="chat-head-text">
               <strong>Campus Customs Assistant</strong>
               <small>
                 {user ? `Chatting as ${user.first_name} · history saved` : 'Guest chat · log in to save it'}
@@ -152,6 +154,7 @@ export default function ChatWidget() {
             {loadingHistory && <p className="muted small center">Loading your saved chat…</p>}
             {messages.map((m, i) => (
               <div key={i} className={`bubble-row ${m.role}${m.saved ? ' saved' : ''}`}>
+                {m.role === 'assistant' && <span className="bubble-avatar"><Bulldog size={26} /></span>}
                 <div className={`bubble ${m.role}`}>
                   {m.role === 'assistant' ? <Markdown text={m.content} /> : m.content}
                 </div>
@@ -170,7 +173,14 @@ export default function ChatWidget() {
                 )}
               </div>
             ))}
-            {busy && <div className="bubble-row assistant"><div className="bubble assistant typing">…</div></div>}
+            {busy && (
+              <div className="bubble-row assistant">
+                <span className="bubble-avatar"><Bulldog size={26} /></span>
+                <div className="bubble assistant typing" aria-label="Assistant is typing">
+                  <span className="paw">🐾</span><span className="paw">🐾</span><span className="paw">🐾</span>
+                </div>
+              </div>
+            )}
             <div ref={endRef} />
           </div>
 
@@ -204,7 +214,8 @@ export default function ChatWidget() {
         aria-expanded={open}
         aria-label={open ? 'Close chat' : 'Open chat'}
       >
-        {open ? '×' : '💬'}
+        {open ? <span className="fab-x">×</span> : <Bulldog size={48} />}
+        {!open && <span className="fab-label">Ask the shop</span>}
       </button>
     </div>
   )

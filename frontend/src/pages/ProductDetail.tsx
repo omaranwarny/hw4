@@ -45,8 +45,16 @@ export default function ProductDetail() {
       </nav>
 
       <div className="detail">
-        <div className="detail-img">
+        <div
+          className="detail-img zoomable"
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect()
+            e.currentTarget.style.setProperty('--zx', `${((e.clientX - r.left) / r.width) * 100}%`)
+            e.currentTarget.style.setProperty('--zy', `${((e.clientY - r.top) / r.height) * 100}%`)
+          }}
+        >
           <img src={p.image_url} alt={p.name} />
+          <span className="zoom-hint" aria-hidden="true">Hover to zoom</span>
         </div>
 
         <div className="detail-info">

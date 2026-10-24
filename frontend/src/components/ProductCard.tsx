@@ -37,7 +37,14 @@ export default function ProductCard({
             })}
           </div>
         )}
-        <strong className="price">{formatPrice(p.price)}</strong>
+        {compact ? (
+          <strong className="price">{formatPrice(p.price)}</strong>
+        ) : (
+          <span className="hang-tag" aria-label={`Price ${formatPrice(p.price)}`}>
+            <span className="hang-hole" aria-hidden="true" />
+            {formatPrice(p.price)}
+          </span>
+        )}
       </div>
     </Link>
   )

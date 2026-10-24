@@ -115,7 +115,7 @@ Not agent tools, but part of the harness: `product_cards(ids)`, which builds the
 | Area | Setting |
 |---|---|
 | **Model** | `OPENAI_MODEL` (default **`gpt-5.6-luna`**) through Portkey (`PORTKEY_API_KEY`). One agent, built once and cached. Restart after editing the prompt. |
-| **Agent loop per message** | ≤ **8** model requests, ≤ **12** tool calls, ≤ **60,000** tokens (`UsageLimits`). **3** retries for output fixes (validator, fact-check, leak guard). |
+| **Agent loop per message** | ≤ **8** model requests, ≤ **12** tool calls, ≤ **60,000** tokens (`UsageLimits`). **3** retries for output fixes (validator, fact-check, leak guard). **Loop guard:** repeating a tool call with the same arguments in one message returns "already called, answer now" without running it again. Added after the audit trail showed "cool" triggering `get_current_page` 8 times. |
 | **Result caps** | Search ≤ **12** results (default 8). Cards per reply ≤ **12** (`MAX_CARDS`). Similar items ≤ **8** (default 4). Chat preview shows 3 cards. |
 | **Context size** | Last **10** turns replayed, each ≤ **2,000** chars. Logged-in history comes from the DB, guest history from the browser. |
 | **Saved history** | `chat_messages`: ≤ **4,000** chars per message. Reload shows the last **50**. |

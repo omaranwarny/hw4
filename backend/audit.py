@@ -111,6 +111,11 @@ class AuditRun:
     def finish(self, stop_reason: str, reply: str | None = None, product_ids: list[str] | None = None,
                usage: object | None = None) -> None:
         entry = self.pending or AuditEntry(step=self.step + 1, timestamp=_now(), **self.base)
+        for call in entry.tool_calls:  # the agent's structured answer is delivered through the final_result tool
+            if call.result == "(pending)":
+                call.result = "final answer delivered" if stop_reason == "completed" else "not completed"
+                call.args = {k: v for k, v in call.args.items() if k != "reply"} | (
+                    {"reply": "(see final_reply)"} if "reply" in call.args else {})
         entry.stop_reason = stop_reason
         entry.final_reply = _short(reply, 300) if reply else None
         entry.product_ids = list(product_ids or [])

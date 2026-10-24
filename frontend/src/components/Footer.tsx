@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
+import Skyline from './Skyline.tsx'
 
 export default function Footer() {
   return (
     <footer className="footer">
+      <Skyline />
       <div className="footer-inner">
         <div>
           <strong className="footer-brand">Campus Customs</strong>

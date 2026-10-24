@@ -78,6 +78,14 @@ now let's make it better. pick 2 front end and 2 agent/backend improvements and 
 **Follow-up:**
 on the product page add a button that opens the chat about that item, and a link to find similar items when your size is sold out
 
+## Problem 10: Style the website
+
+**Prompt:**
+make the site feel like a real campus shop, not a template. think old-school varsity: big chenille Y patch, pennants for the categories, prices on little clothing hang tags, a scrolling banner like a shop window, and a bulldog for the chat assistant. add some motion but nothing annoying. then write output/design.md, short, on what changed and why it keeps people around and buying
+
+**Follow-up:**
+put some real products floating around the hero so you see merch right away, and let me zoom in on the product photo
+
 ## Problem 11: Site testing (app check)
 
 **Prompt:**
@@ -93,6 +101,9 @@ last backend piece: every time the agent runs, append its loop steps to output/a
 
 **Follow-up:**
 add a code check too so the bot can never spit out an api key, password hash or its own instructions, even if someone tricks it
+
+**Follow-up:**
+the audit log shows I typed "cool" and the bot called get_current_page 8 times until it hit the limit. stop it from repeating the same tool call, and small talk shouldn't need tools at all
 
 ## Problem 13: Push to GitHub
 
