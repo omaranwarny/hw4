@@ -64,7 +64,7 @@
     <div class="two">
       <figure>
         <img src="app_check_images/inventory.png" alt="Chat answering a stock question on the Baseball Left Chest Crewneck page" onerror="missing(this)">
-        <figcaption>The assistant's reply on the product page. The stock table on the left of the page shows the same numbers.</figcaption>
+        <figcaption>The assistant's reply on the product page: "XS and XL are sold out… It's $58.00… still available in S, M, L, and XXL." Every number matches the database table on the right. It then called <code>find_similar_products</code> and put 4 in-stock alternatives, all $58.00 with XS and XL available, on the page as "Similar crewnecks in XS and XL". The audit trail (run <code>cb5462b6</code>) shows the exact calls: <code>check_stock</code> XS → sold out, <code>check_stock</code> XL → sold out, <code>get_price</code> → $58.00.</figcaption>
       </figure>
       <div class="truth">
         <h3>Database says (campus_customs.db)</h3>
